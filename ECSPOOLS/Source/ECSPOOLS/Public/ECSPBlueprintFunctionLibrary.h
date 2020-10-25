@@ -216,6 +216,7 @@ public:
 		else
 		{
 			UObject* ske = LoadObject<UObject>(nullptr, *assetpath);
+			ske->AddToRoot();
 			assetpools.Add(assetpath) = ske;
 			return ske;
 		}
