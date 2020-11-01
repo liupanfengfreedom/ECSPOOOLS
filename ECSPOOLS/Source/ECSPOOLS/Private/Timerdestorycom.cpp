@@ -8,25 +8,28 @@
 // Sets default values for this component's properties
 UTimerdestorycom::UTimerdestorycom()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
-
+void UTimerdestorycom::ECSBeginplay()
+{
+	owner = GetOwner();
+	//SetComponentTickEnabled(true);
+}
+void UTimerdestorycom::ECSEndplay()
+{
+	//SetComponentTickEnabled(false);
+}
 // Called when the game starts
 void UTimerdestorycom::BeginPlay()
 {
 	Super::BeginPlay();
-
 	// ...
 	
 }
-UTimerdestorycom* UTimerdestorycom::PublicBeginPlay(float lifespan)
+UTimerdestorycom* UTimerdestorycom::settime(float time)
 {
-	GetWorld()->GetTimerManager().SetTimer(gamecontroltimer, this, &UTimerdestorycom::timerworker, 10, false, lifespan);
+	GetWorld()->GetTimerManager().SetTimer(gamecontroltimer, this, &UTimerdestorycom::timerworker, 10, false, time);
 	return this;
 }
 void UTimerdestorycom::timerworker()
@@ -34,7 +37,7 @@ void UTimerdestorycom::timerworker()
 	////GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("timerworker!"));
 	//GetOwner()->Destroy();
 	//UECSPBlueprintFunctionLibrary::ActorRecycle(GetOwner());
-	ondestroyactorevent.ExecuteIfBound(GetOwner());
+	ondestroyactorevent.ExecuteIfBound(owner);
 }
 // Called every frame
 void UTimerdestorycom::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

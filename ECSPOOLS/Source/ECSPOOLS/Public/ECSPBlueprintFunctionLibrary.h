@@ -47,7 +47,8 @@ public:
 			{
 				NewComp = (T * )(*actorarray)[num - 1];
 				actorarray->RemoveAt(num - 1);
-				//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("actor from pool"));
+				NewComp->Rename(TEXT(""), Outer);
+				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Component from pool"));
 			}
 		}
 		if (NewComp == nullptr)
@@ -58,11 +59,13 @@ public:
 				return nullptr;
 			}
 			NewComp->AddToRoot();
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Component from NewObject"));
 		}
 
 		NewComp->RegisterComponent();        //You must ConstructObject with a valid Outer that has world, see above	 
 		//FAttachmentTransformRules atf(EAttachmentRule::KeepRelative,false);
 		//NewComp->AttachToComponent(Outer->GetRootComponent(), atf);
+
 		Outer->AddOwnedComponent(NewComp);
 		ECSinterface* ep = (ECSinterface*)NewComp;
 		ep->ECSBeginplay();
@@ -86,8 +89,7 @@ public:
 			ac->UnregisterComponent();
 			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Component from pool"));
 			//ac->DestroyComponent();
-			TArray<UObject*> uar = componentpools.FindOrAdd(T::StaticClass());
-			uar.AddUnique(ac);
+			componentpools.FindOrAdd(T::StaticClass()).AddUnique(ac);
 		}
 		//ac = Cast<T>(Outer->GetComponentByClass(T::StaticClass()));
 		//if (ac)

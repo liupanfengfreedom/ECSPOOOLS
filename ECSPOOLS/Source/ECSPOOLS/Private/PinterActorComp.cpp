@@ -14,7 +14,15 @@ UPinterActorComp::UPinterActorComp()
 	// ...
 }
 
-
+void UPinterActorComp::ECSBeginplay()
+{
+	owner = GetOwner();
+	//SetComponentTickEnabled(true);
+}
+void UPinterActorComp::ECSEndplay()
+{
+	//SetComponentTickEnabled(false);
+}
 // Called when the game starts
 void UPinterActorComp::BeginPlay()
 {
@@ -34,7 +42,7 @@ void UPinterActorComp::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	if (b)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("true!"));
-		GetOwner()->SetActorLocation(hr.Location);
+		owner->SetActorLocation(hr.Location);
 	}
 	else
 	{

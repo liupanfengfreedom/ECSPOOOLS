@@ -3,15 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/SceneComponent.h"
+#include "Components/ActorComponent.h"
+#include "ECSPBlueprintFunctionLibrary.h"
 #include "PinterActorComp.generated.h"
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class ECSPOOLS_API UPinterActorComp : public USceneComponent
+class ECSPOOLS_API UPinterActorComp : public UActorComponent, public ECSinterface
 {
 	GENERATED_BODY()
-
+		AActor* owner;
 public:	
 	// Sets default values for this component's properties
 	UPinterActorComp();
@@ -24,5 +25,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+public:
+	virtual void ECSBeginplay() override;
+	virtual void ECSEndplay()  override;
 };
