@@ -20,6 +20,13 @@ void UTimerdestorycom::ECSEndplay()
 {
 	//SetComponentTickEnabled(false);
 }
+void UTimerdestorycom::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	// ...
+
+}
+
 // Called when the game starts
 void UTimerdestorycom::BeginPlay()
 {

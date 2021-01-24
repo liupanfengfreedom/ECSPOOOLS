@@ -7,6 +7,7 @@
 #include "ECSInterface.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ECSPBlueprintFunctionLibrary.generated.h"
+class UUserWidget;
 class ECSinterface
 {
 public:
@@ -22,10 +23,23 @@ class ECSPOOLS_API UECSPBlueprintFunctionLibrary : public UBlueprintFunctionLibr
 	GENERATED_BODY()
 	static int liveactorfrompools;
 	static TMap<FString, UObject*> assetpools;
+
+	static TMap<FString, UClass*> UserWidgetClasspools;
+	static TMap<UClass*, TArray<UUserWidget*>> UserWidgetpools;
+
 	static TMap<UClass*, TArray<AActor*>> pools;
 	static TMap<UClass*, TArray<UObject*>> componentpools;
+	static TSet<UObject*> cleanuobjectpools;
+
+
 public:
 	static int getnumberofliveactorfrompool() { return liveactorfrompools; }
+	UFUNCTION(BlueprintCallable, Category = ECSPBlueprint)
+		static UUserWidget* GetUserWidgetFromPool(FString assetpath, UWorld* outer);
+	UFUNCTION(BlueprintCallable, Category = ECSPBlueprint)
+		static void UserWidgetRecycle(UUserWidget* obj);
+	UFUNCTION(BlueprintCallable, Category = ECSPBlueprint)
+		static void ResetECSPool();
 public:
 	template< class T = UActorComponent>
 	FUNCTION_NON_NULL_RETURN_START
@@ -48,7 +62,7 @@ public:
 				NewComp = (T * )(*actorarray)[num - 1];
 				actorarray->RemoveAt(num - 1);
 				NewComp->Rename(TEXT(""), Outer);
-				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Component from pool"));
+				//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Component from pool"));
 			}
 		}
 		if (NewComp == nullptr)
@@ -59,7 +73,8 @@ public:
 				return nullptr;
 			}
 			NewComp->AddToRoot();
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Component from NewObject"));
+			cleanuobjectpools.Add(NewComp);
+			//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, FString("Component from NewObject: ").Append(T::StaticClass()->GetDefaultObjectName().ToString()));
 		}
 
 		NewComp->RegisterComponent();        //You must ConstructObject with a valid Outer that has world, see above	 
@@ -81,24 +96,18 @@ public:
 		T  * ac = Cast<T>(Outer->GetComponentByClass(T::StaticClass()));
 		if (ac)
 		{
-			ac->SetComponentTickEnabled(false);
 			ECSinterface* ep = (ECSinterface*)ac;
 			ep->ECSEndplay();
+			ac->SetComponentTickEnabled(false);
 			Outer->RemoveInstanceComponent(ac);
 			Outer->RemoveOwnedComponent(ac);
 			ac->UnregisterComponent();
 			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Component from pool"));
 			//ac->DestroyComponent();
 			componentpools.FindOrAdd(T::StaticClass()).AddUnique(ac);
+			return true;
 		}
-		//ac = Cast<T>(Outer->GetComponentByClass(T::StaticClass()));
-		//if (ac)
-		//{
-		//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("component remove failed"));
-
-		//	//ac->DestroyComponent();
-		//}
-		return true;
+		return false;
 	}
 	template< class T = AActor>
 	   FUNCTION_NON_NULL_RETURN_START
@@ -206,6 +215,8 @@ public:
 		actorarray->AddUnique(pa);
 		return true;
 	}
+
+
 	   UFUNCTION(BlueprintCallable, Category = ECSPBlueprint)
 		static UObject* GetAssetFromPool(FString assetpath)
 	{
@@ -218,9 +229,14 @@ public:
 		else
 		{
 			UObject* ske = LoadObject<UObject>(nullptr, *assetpath);
+			//ske->SetFlags(EObjectFlags::RF_Standalone);
 			ske->AddToRoot();
+			cleanuobjectpools.Add(ske);
 			assetpools.Add(assetpath) = ske;
 			return ske;
 		}
 	}
+
+
+
 };
